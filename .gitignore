@@ -3,3 +3,7 @@ backend/.env
 
 backend/outputs/*
 backend/uploads/*
+
+
+frontend/node_modules/
+frontend/.env
