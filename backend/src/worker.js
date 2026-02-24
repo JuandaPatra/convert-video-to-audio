@@ -1,6 +1,7 @@
 const path = require("path");
 const { spawn } = require("child_process");
 const { setProgress, setOutput, setError } = require("./progress");
+const logger = require("./logger");
 
 const queue = [];
 let active = 0;
@@ -72,6 +73,7 @@ function convert(jobId, input, output) {
 
       ffmpeg.stderr.on("data", (data) => {
         console.error("FFmpeg:", data.toString());
+        logger.error(`FFmpeg error for job ${jobId}: ${data.toString()}`);
       });
 
       ffmpeg.stdout.on("data", (data) => {
@@ -97,6 +99,7 @@ function convert(jobId, input, output) {
           console.log(jobId, "Conversion failed");
           // reject(new Error("FFmpeg failed with code " + code));
           setError(jobId, code);
+          logger.error(`Job ${jobId} failed with code ${code}`);
         }
       });
     });
