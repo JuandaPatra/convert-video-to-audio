@@ -2,37 +2,55 @@
 
 import { useUploadStore } from "@/store/uploadStore";
 import { uploadVideo, getProgress } from "@/services/convertService";
-import { get } from "http";
+import { generateClientId} from "@/helpers/generateId";
 
-export default function useUpload() {
+
+export  function useUpload() {
+  const selectedFiles = useUploadStore((state) => state.selectedFile);
+  const jobs = useUploadStore((state) => state.jobs);
+  // const clearSelectedFiles = useUploadStore((s) => s.clearSelectedFiles);
+
   const addJob = useUploadStore((state) => state.addJob);
   const updateProgress = useUploadStore((state) => state.updateProgress);
   const setStatus = useUploadStore((state) => state.setStatus);
   const setError = useUploadStore((state) => state.setError);
-  const removeJob = useUploadStore((state) => state.removeJob);
+  // const removeJob = useUploadStore((state) => state.remove  Job);
 
-  const uploadFile = async (file: File) => {
-    const jobId = await uploadVideo(file);
+  const uploadFile = async (clientId: string) => {
+    try{
+      console.log('uploadFile clientId', clientId)
+      const jobId = await uploadVideo(jobs.find(file => file.clientId === clientId)?.file as File);
+      console.log('jobId', jobId)
+      updateProgress(jobId, 0);
+      setStatus(clientId,jobId, "uploading");
+      pollProgress(clientId,jobId);
 
-    addJob({
-      jobId,
-      file,
-      fileName: file.name,
-      status: "uploading",
-      progress: 0,
-    });
+      // const jobId = await uploadVideo(jobs.find(file =>  === clientId)?.file as File);
+      // addJob({
+      //   clientId: generateClientId(jobs.find(file => generateClientId(file.file) === clientId)?.file as File),
+      //   jobId,
+      //   file: jobs.find(file => generateClientId(file.file) === clientId)?.file as File,
+      //   fileName: jobs.find(file => generateClientId(file.file) === clientId)?.fileName as string,
+      //   status: "uploading",
+      //   progress: 0,
+      // });
 
-    pollProgress(jobId);
+      // pollProgress(jobId);
+
+    }catch(e){
+      console.log('error', e)
+    }
+    
   };
 
-  const pollProgress = async (jobId: string) => {
+  const pollProgress = async (clientId : string, jobId: string) => {
     try {
     const interval = setInterval(async () => {
         const progress = await getProgress(jobId);
         updateProgress(jobId, progress)
 
         if(progress >= 100){
-            setStatus(jobId, "completed");
+            setStatus(clientId,jobId, "completed");
             clearInterval(interval);
         }
     

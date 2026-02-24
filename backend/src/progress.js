@@ -22,10 +22,16 @@ function deleteJob(jobId) {
   outputMap.delete(jobId);
 }
 
+function setError(jobId, error){
+  progressMap.set(jobId, -1);
+  outputMap.set(jobId, error);
+}
+
 module.exports = {
   setProgress,
   getProgress,
   setOutput,
   getOutput,
-  deleteJob
+  deleteJob,
+  setError
 };

@@ -1,5 +1,6 @@
 import Header from "@/components/layout/Header";
 import UploadDropzone from "@/components/uploads/UploadDropzone";
+import UploadList from "@/components/uploads/UploadList";
 
 export  default function ConvertPage() {
   return (
@@ -10,6 +11,8 @@ export  default function ConvertPage() {
       <h1 className="text-3xl font-bold mb-4">Convert Page</h1>
 
       <UploadDropzone />
+
+      <UploadList />
       
     </main>
     </>

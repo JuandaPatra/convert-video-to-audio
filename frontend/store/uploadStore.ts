@@ -1,8 +1,9 @@
 import { create } from "zustand";
 
-export type UploadStatus = "uploading" | "processing" | "completed" | "error";
+export type UploadStatus = "idle" | "uploading" | "processing" | "completed" | "error";
 
 export interface UploadJob {
+  clientId: string; 
   jobId: string;
   file: File;
   fileName: string;
@@ -11,14 +12,22 @@ export interface UploadJob {
   errorMessage?: string; // present if status is "error"
 }
 
+export interface SelectedFile {
+  file: File;
+  fileName: string;
+}
 interface UploadStore {
+  selectedFile :SelectedFile[]
   jobs: UploadJob[];
+
+  addSelectedFile : (file: File[]) => void;
 
   addJob: (job: UploadJob) => void;
 
   updateProgress: (jobId: string, progress: number) => void;
 
   setStatus: (
+    clientId : string,
     jobId: string,
     status: UploadStatus,
     errorMessage?: string,
@@ -32,7 +41,13 @@ interface UploadStore {
 }
 
 export const useUploadStore = create<UploadStore>((set) => ({
+  selectedFile :[],
   jobs: [],
+
+  addSelectedFile : (file) =>
+    set((state) => ({
+      selectedFile: [...state.selectedFile, ...file.map(f => ({file: f, fileName: f.name}))],
+    })),
 
   addJob: (job) =>
     set((state) => ({
@@ -45,10 +60,11 @@ export const useUploadStore = create<UploadStore>((set) => ({
         job.jobId === jobId ? { ...job, progress } : job,
       ),
     })),
-  setStatus: (jobId, status, errorMessage) =>
+  setStatus: (clientId, jobId, status, errorMessage) =>
     set((state) => ({
       jobs: state.jobs.map((job) =>
-        job.jobId === jobId ? { ...job, status, errorMessage } : job,
+        job.clientId == clientId ? {...job, jobId, status, errorMessage} :job
+
       ),
     })),
   setError: (jobId, errorMessage) =>

@@ -14,11 +14,7 @@ export async function uploadVideo(file: File): Promise<string> {
 
   formData.append("video", file);
   try {
-    const response = await axios.post<UploadResponse>("/convert", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await axios.post<UploadResponse>("/convert", formData);
     return response.data.jobId;
   } catch (error) {
     console.error("Upload failed", error);
